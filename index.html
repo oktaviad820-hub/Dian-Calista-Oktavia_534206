@@ -1,0 +1,822 @@
+<html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <title>SISTEM INFORMASI STATISTIK Kabupaten Klaten - Data Penduduk (2024)</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* :root mendefinisikan variabel warna global yang bisa dipakai di seluruh halaman */
+    :root {
+      --bg: #fdfaf5; /* Variabel untuk warna latar belakang utama */
+      --card: #ffffff; /* Variabel untuk warna latar belakang kotak (card) */
+      --accent1: #c3a68b; /* Variabel untuk warna aksen (beige) */
+      --accent2: #8b735b; /* Variabel untuk warna aksen kedua (taupe) */
+      --text: #800000; /* Variabel untuk warna teks utama (maroon) */
+      --text-muted-opacity: 0.8; 
+      --link: var(--accent2); /* Variabel untuk warna link */
+      --border-color: #e5e0d9; /* Variabel untuk warna border */
+      --shadow-color: rgba(139, 115, 91, 0.1); /* Variabel untuk warna bayangan */
+      --table-header-bg: var(--accent1); /* Variabel untuk latar header tabel */
+      --table-header-text: #ffffff; 
+      --table-row-even: #f9f6f2; /* Variabel untuk warna baris genap tabel */
+      --button-bg: var(--accent2); /* Variabel untuk latar tombol */
+      --button-text: #ffffff; 
+      --button-hover-bg: #745f4a; /* Variabel untuk warna tombol saat disentuh */
+      --marker-fill: rgba(195, 166, 139, 0.8); /* Variabel untuk isi lingkaran di peta */
+      --marker-border: #8b735b; /* Variabel untuk garis tepi lingkaran di peta */
+      --chart-bar-bg: rgba(195, 166, 139, 0.7); /* Variabel untuk warna grafik batang */
+      --chart-bar-border: #8b735b; 
+      /* Variabel warna-warna untuk grafik pai */
+      --pie-color-1: #d2b48c; --pie-color-2: #c3a68b; --pie-color-3: #b08d6d;
+      --pie-color-4: #8b735b; --pie-color-5: #a0846c; --pie-color-6: #967d63;
+      --pie-label-light: #ffffff; /* Variabel untuk label di area pai yang gelap */
+      --pie-label-dark: #4f4a45; /* Variabel untuk label di area pai yang terang */
+    }
+
+    /* Tanda * memilih semua elemen di halaman */
+    * { box-sizing: border-box; } /* Aturan ini mengubah cara browser menghitung lebar elemen */
+
+    /* Bagian ini mengatur gaya dasar untuk seluruh isi halaman (body) */
+    body {
+      margin: 0; /* Menghapus margin bawaan browser */
+      font-family: 'Poppins', Arial, Helvetica, sans-serif; /* Menentukan font utama */
+      background: var(--bg); /* Mengatur warna latar belakang halaman */
+      color: var(--text); /* Mengatur warna teks default (maroon) */
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.65; /* Mengatur jarak antar baris teks */
+      font-size: 15px; /* Mengatur ukuran font dasar */
+    }
+
+    /* Kelas .wrap ini berfungsi sebagai pembungkus utama konten agar posisinya di tengah */
+    .wrap { width: 95%; max-width: 1300px; margin: 30px auto; }
+    /* Kelas .card ini memberi gaya pada kotak-kotak putih yang berisi konten */
+    .card { background: var(--card); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 6px 15px var(--shadow-color); padding: 30px; margin-bottom: 30px; }
+
+    /* Bagian ini mengatur gaya khusus untuk header utama */
+    header.main-header {
+      display: flex; /* Mengatur layout header agar logo dan teks bisa berdampingan */
+      align-items: center; /* Membuat logo dan teks sejajar secara vertikal */
+      gap: 30px; /* Memberi jarak antara logo dan teks */
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 30px;
+      margin-bottom: 30px;
+    }
+
+    /* Bagian ini mengatur ukuran dan tampilan logo di dalam header */
+    header.main-header img {
+      width: 200px; 
+      height: 200px;
+      object-fit: contain; /* Memastikan logo pas tanpa terdistorsi */
+      border-radius: 8px;
+      background: transparent;
+      padding: 0;
+      border: none;
+      flex-shrink: 0; /* Mencegah logo mengecil */
+    }
+
+    /* Bagian ini mengatur area teks di dalam header */
+    header.main-header .title-section {
+      flex-grow: 1; /* Membuat area teks mengambil sisa ruang yang ada */
+      text-align: center; /* Membuat teks di header rata tengah */
+    }
+     /* Bagian ini mengatur gaya sub-judul "SISTEM INFORMASI STATISTIK" */
+     header.main-header .sub-heading {
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--text);
+        opacity: var(--text-muted-opacity);
+        margin-bottom: 8px; 
+        display: block; 
+     }
+
+    /* Bagian ini mengatur gaya judul utama "Kabupaten Klaten" */
+    header.main-header h1 {
+      margin: 0 0 10px 0; 
+      font-size: 36px; 
+      color: var(--text);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    /* Bagian ini mengatur gaya sub-judul "Data Penduduk (2024)" */
+    header.main-header h2 { 
+      margin: 0;
+      font-size: 18px; 
+      font-weight: 400;
+      color: var(--text);
+      opacity: 0.8; 
+    }
+
+    /* Bagian ini mengatur gaya untuk menu navigasi */
+    nav { display: flex; justify-content: center; gap: 10px; padding: 12px; background: var(--table-row-even); border-radius: 8px; margin-bottom: 30px; flex-wrap: wrap; border: 1px solid var(--border-color); box-shadow: 0 4px 8px rgba(0,0,0,0.04); }
+    /* Bagian ini mengatur gaya untuk setiap link di dalam menu navigasi */
+    nav a { padding: 10px 18px; display: inline-block; color: var(--link); font-weight: 500; text-decoration: none; border-radius: 6px; transition: background-color 0.2s ease, color 0.2s ease; font-size: 14px; }
+    /* Bagian ini mengatur gaya link saat disentuh (hover) atau saat aktif */
+    nav a:hover, nav a.active { background: var(--accent2); color: var(--card); }
+
+    /* Bagian ini mengatur layout grid utama (kolom kiri dan kolom kanan) */
+    .grid { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(420px, 1fr); gap: 30px; align-items: start; }
+    
+    /* @media query ini mengatur tampilan saat layar lebih kecil dari 1024px (tablet) */
+    @media (max-width: 1024px) {
+      .grid { grid-template-columns: 1fr; } /* Mengubah layout grid menjadi 1 kolom */
+      header.main-header { flex-direction: column; text-align: center; } /* Membuat header menjadi 1 kolom */
+      header.main-header img { width: 180px; height: 180px; }
+      header.main-header h1 { font-size: 34px; }
+      header.main-header .sub-heading { font-size: 19px; }
+      header.main-header h2 { font-size: 17px; }
+    }
+    /* @media query ini mengatur tampilan saat layar lebih kecil dari 600px (HP) */
+    @media (max-width: 600px) { 
+        header.main-header { gap: 10px; padding-bottom: 20px; margin-bottom: 20px;}
+        header.main-header img { width: 120px; height: 120px; margin-bottom: 5px;}
+        header.main-header h1 { font-size: 28px; }
+        header.main-header .sub-heading { font-size: 17px; }
+        header.main-header h2 { font-size: 15px; }
+    }
+
+    /* Bagian ini mengatur gaya paragraf pengantar di kolom kiri */
+    .left .intro p { text-align: justify; margin: 0 0 15px 0; font-size: 15px; color: var(--text); }
+
+    /* Bagian ini memberi ukuran dan latar belakang untuk kotak peta */
+    #map { height: 450px; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; background: #eee; }
+    
+    /* Bagian ini memberi gaya pada kotak pembungkus setiap grafik (chart) */
+    .chart-container {
+      padding: 25px; border: 1px solid var(--border-color); border-radius: 8px;
+      background: #fff; margin-bottom: 30px; position: relative;
+      display: flex; flex-direction: column; box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+     /* Bagian ini mengatur pembungkus dari elemen <canvas> grafik */
+     .chart-container .canvas-wrapper {
+        position: relative;
+        width: 100%;
+        margin: 15px auto 0 auto;
+        max-width: 100%;
+     }
+
+     /* Bagian ini mengatur elemen <canvas> tempat grafik digambar */
+     .chart-container canvas {
+        display: block; box-sizing: border-box;
+        max-height: 400px; /* Membatasi tinggi maksimum grafik */
+        width: 100% !important;
+        height: auto !important; 
+     }
+     /* Bagian ini mengatur gaya teks keterangan di bawah grafik */
+     .chart-caption {
+        font-size: 12px;
+        color: var(--text); 
+        opacity: 0.8; 
+        text-align: center;
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px dashed var(--border-color); 
+     }
+
+
+    /* Bagian ini memberi gaya pada kotak pembungkus tabel data */
+    .table-container { overflow-x: auto; margin-top: 25px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card); box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+    /* Bagian ini mengatur gaya dasar tabel data */
+    table.data { width: 100%; border-collapse: collapse; font-size: 13px; border: none; }
+    /* Bagian ini mengatur gaya sel (th dan td) di dalam tabel */
+    table.data th, table.data td { border: none; border-bottom: 1px solid var(--border-color); padding: 11px 9px; text-align: right; vertical-align: middle; white-space: nowrap; color: var(--text); }
+    /* Bagian ini mengatur sel header (th) agar rata tengah dan tebal */
+    table.data th { text-align: center; font-weight: 600; }
+    /* Bagian ini mengatur sel kolom pertama dan kedua agar rata kiri */
+    table.data td:first-child, table.data td:nth-child(2) { text-align: left; white-space: normal; }
+    /* Bagian ini mengatur gaya baris header (thead th) */
+    table.data thead th { background: var(--table-header-bg); color: var(--table-header-text); position: sticky; top: 0; z-index: 1; border-bottom: 2px solid var(--accent2); }
+    /* Bagian ini menghapus border bawah pada baris terakhir tabel */
+    table.data tbody tr:last-child td { border-bottom: none; }
+    /* Bagian ini memberi warna latar belakang pada baris genap */
+    table.data tbody tr:nth-child(even) { background: var(--table-row-even); }
+    table.data tbody tr:nth-child(odd) { background: var(--table-row-odd); }
+    /* Bagian ini memberi efek warna saat baris tabel disentuh (hover) */
+    table.data tbody tr:hover td { background: #ede8e1; color: #5c0000; } 
+
+    /* Bagian ini mengatur gaya kotak kontrol (pencarian dan reset) */
+    .controls { display: flex; gap: 12px; margin-bottom: 25px; padding: 18px; background: var(--table-row-even); border-radius: 8px; border: 1px solid var(--border-color); align-items: center; flex-wrap: wrap; }
+    /* Bagian ini mengatur gaya kotak input teks pencarian */
+    .controls input[type="text"] { padding: 11px 15px; border-radius: 6px; border: 1px solid var(--border-color); flex-grow: 1; min-width: 250px; font-size: 14px; transition: border-color 0.2s ease, box-shadow 0.2s ease; color: var(--text); }
+    /* Bagian ini mengatur gaya kotak input saat difokuskan (diklik) */
+    .controls input[type="text"]:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(139, 115, 91, 0.2); outline: none; }
+     /* Bagian ini mengatur gaya teks placeholder (contoh: "Ketik nama...") */
+     .controls input::placeholder { color: var(--text); opacity: 0.6; }
+    /* Bagian ini mengatur gaya tombol "Reset" */
+    .controls button { padding: 11px 20px; border-radius: 6px; border: none; background: var(--button-bg); color: var(--button-text); cursor: pointer; font-weight: 600; font-size: 14px; transition: background-color 0.2s ease; white-space: nowrap; }
+    /* Bagian ini mengatur gaya tombol "Reset" saat disentuh (hover) */
+    .controls button:hover { background: var(--button-hover-bg); }
+
+    /* Bagian ini mengatur layout grid untuk 3 kotak statistik ringkasan */
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-top: 25px; }
+    /* Bagian ini mengatur gaya setiap kotak statistik */
+    .stat { background: var(--card); border: 1px solid var(--border-color); padding: 18px; border-radius: 8px; text-align: center; box-shadow: 0 3px 6px var(--shadow-color); }
+    /* Bagian ini mengatur gaya label (teks kecil) di kotak statistik */
+    .stat .label { font-size: 14px; color: var(--text); opacity: 0.9; margin-bottom: 5px; display: block; }
+    /* Bagian ini mengatur gaya angka (teks besar) di kotak statistik */
+    .stat b { display: block; font-size: 22px; color: var(--text); font-weight: 700; line-height: 1.2; }
+     /* Bagian ini mengatur gaya teks catatan kaki di kotak statistik */
+     .stat .footnote { font-size: 11px; color: var(--text); opacity: 0.8; margin-top: 8px; display: block; }
+
+    /* Bagian ini mengatur gaya area footer di bagian paling bawah */
+    .footer { text-align: center; margin-top: 35px; color: var(--text); opacity: 0.9; font-size: 13px; border-top: 1px solid var(--border-color); padding-top: 25px; background: var(--card); border-radius: 12px; box-shadow: 0 6px 15px var(--shadow-color); padding: 30px;}
+    /* Bagian ini mengatur gaya link di dalam footer */
+    .footer a { color: var(--link); text-decoration: none; font-weight: 500;}
+    /* Bagian ini memberi garis bawah pada link footer saat disentuh */
+    .footer a:hover { text-decoration: underline; }
+
+    /* @media query ini mengatur penyesuaian tampilan untuk layar sedang (tablet) */
+    @media (max-width: 768px) {
+      body { font-size: 14px; }
+      header.main-header h1 { font-size: 30px; }
+      header.main-header .sub-heading { font-size: 18px; }
+      header.main-header h2 { font-size: 16px; }
+      header.main-header img { width: 160px; height: 160px; }
+      .card { padding: 20px; }
+      header.main-header { padding-bottom: 25px; margin-bottom: 25px; }
+      nav { justify-content: center; }
+      nav a { padding: 9px 12px; font-size: 13px; }
+      .controls { padding: 12px; }
+      .controls input[type="text"] { width: 100%; margin-bottom: 10px; }
+      .controls button { width: 100%; }
+      .stat { padding: 12px; min-width: calc(50% - 10px); }
+      .stat b { font-size: 19px; }
+      table.data th, table.data td { padding: 9px 7px; font-size: 12px; }
+    }
+    
+    /* @media query ini mengatur penyesuaian tampilan untuk layar kecil (HP) */
+    @media (max-width: 480px) {
+        header.main-header img { width: 140px; height: 140px; }
+        header.main-header h1 { font-size: 28px; }
+        .stat { width: 100%; }
+        #map { height: 300px; } /* Membuat peta lebih pendek di HP */
+    }
+
+    /* Bagian ini mengatur gaya kotak popup di dalam peta Leaflet */
+    .leaflet-popup-content-wrapper { border-radius: 8px !important; background: var(--card); }
+    /* Bagian ini mengatur gaya teks di dalam popup peta */
+    .leaflet-popup-content { color: var(--text); font-family: 'Poppins', sans-serif; line-height: 1.7; }
+    .leaflet-popup-content strong { color: var(--text); font-weight: 600; }
+    .leaflet-popup-tip { background: var(--card); }
+     /* Bagian ini mengatur gaya kotak tooltip (saat hover) di peta Leaflet */
+     .leaflet-tooltip { border-radius: 4px !important; background-color: rgba(79, 74, 69, 0.9) !important; color: white !important; border: none !important; box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important; padding: 4px 8px !important; font-size: 12px !important; }
+     .leaflet-tooltip strong { color: #f0e6d9; }
+
+     /* Bagian ini mengatur gaya judul di atas grafik dan tabel */
+     .chart-title { margin: 0 0 20px 0; text-align: center; color: var(--accent2); font-size: 19px; font-weight: 600; }
+
+  </style>
+</head>
+
+<body>
+  
+  <div class="wrap">
+    
+    <header class="main-header card">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiJ_9a55GcQUm4HeKeqZy3Zwijn_Eeq96Cgg&s" alt="Logo Kabupaten Klaten">
+       
+      <div class="title-section">
+        <span class="sub-heading">SISTEM INFORMASI STATISTIK</span>
+        <h1>Kabupaten Klaten</h1>
+        <h2>Data Penduduk (2024)</h2>
+      </div>
+    </header>
+
+    <nav>
+      <a href="#" class="active">Kependudukan</a>
+      <a href="#">Geografi & Iklim</a>
+      <a href="#">Pemerintahan</a>
+      <a href="#">Sosial</a>
+      <a href="#">Ekonomi</a>
+    </nav>
+
+    <div class="card">
+      <div class="grid">
+        
+        <div class="left">
+          
+          <section class="intro">
+             <h3 class="chart-title" style="color: var(--accent2); margin-top: 0; text-align: left;">Ringkasan Data Kependudukan</h3>
+            <p>
+              Halaman ini menyajikan data kependudukan Kabupaten Klaten per kecamatan untuk tahun 2024, meliputi jumlah penduduk, laju pertumbuhan, persentase distribusi, kepadatan penduduk, dan rasio jenis kelamin. Data bersumber dari Badan Pusat Statistik (BPS) Kabupaten Klaten. Visualisasi data disajikan dalam bentuk tabel, peta interaktif, serta grafik batang dan diagram pai untuk memudahkan analisis. Gunakan fitur pencarian untuk memfilter data berdasarkan nama kecamatan.
+            </p>
+
+            <div class="controls">
+              <input id="filterInput" type="text" placeholder="Ketik nama kecamatan..." aria-label="Filter Kecamatan" />
+              <button id="resetBtn" type="button">Reset</button>
+            </div>
+
+            <div class="summary">
+              <div class="stat">
+                <span class="label">Jumlah Kecamatan</span>
+                <b id="kecamatanCount">-</b> <span class="footnote">(Ditampilkan dalam tabel)</span>
+              </div>
+              <div class="stat">
+                <span class="label">Luas Wilayah Daratan</span>
+                <b>655,56 km²</b>
+                <span class="footnote">Sumber: Klaten Dalam Angka</span>
+              </div>
+              <div class="stat">
+                <span class="label">Rata-rata Kepadatan</span>
+                <b id="avgDensity">-</b> <span class="footnote">(Jiwa per km² dari tabel)</span>
+              </div>
+            </div>
+          </section>
+
+          <div class="table-container" style="margin-top: 25px;">
+            <h3 class="chart-title" style="color: var(--accent2);">Tabel Statistik Kependudukan per Kecamatan (2024)</h3>
+            <table class="data" id="dataTable" aria-label="Data statistik kependudukan Kabupaten Klaten per kecamatan tahun 2024">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Kecamatan</th>
+                  <th>Jumlah Penduduk (Jiwa)</th>
+                  <th>Laju Pertumbuhan (%)</th>
+                  <th>Persentase Penduduk (%)</th>
+                  <th>Kepadatan (Jiwa/km²)</th>
+                  <th>Rasio JK (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="right">
+          
+          <div class="card">
+            <h3 class="chart-title" style="color: var(--accent2);">Peta Kepadatan Penduduk (Estimasi Lokasi)</h3>
+            <div id="map"></div>
+             <div style="font-size:12px; color:var(--text); opacity: 0.8; margin-top:10px; text-align:center;">
+                Ukuran lingkaran proporsional dengan kepadatan penduduk.
+             </div>
+          </div>
+
+          <div class="chart-container card">
+             <h3 class="chart-title" style="color: var(--accent2);">Grafik Kepadatan Penduduk per Kecamatan</h3>
+             <div class="canvas-wrapper"> 
+                <canvas id="barChartCanvas" aria-label="Grafik batang kepadatan penduduk per kecamatan"></canvas>
+             </div>
+             <div class="chart-caption">
+                Sentuh grafik untuk mengetahui nama kecamatan dan nilai kepadatan.
+             </div>
+          </div>
+
+          <div class="chart-container card">
+             <h3 class="chart-title" style="color: var(--accent2);">Diagram Pai Distribusi Penduduk (%)</h3>
+               <div class="canvas-wrapper" id="pieChartCanvasWrapper"> 
+                <canvas id="pieChartCanvas" aria-label="Diagram pai distribusi persentase penduduk per kecamatan"></canvas>
+               </div>
+               <div class="chart-caption">
+                Sentuh diagram untuk mengetahui nama kecamatan dan persentase.
+             </div>
+          </div>
+        </div>
+      </div>
+    </div> <div class="footer card">
+      Sumber Data: <a href="https://klatenkab.bps.go.id/" target="_blank">Badan Pusat Statistik Kabupaten Klaten</a> (Klaten Dalam Angka 2024).<br>
+      Pemerintah Kabupaten Klaten - Jl. Pemuda No.294, Klaten Tengah, Klaten, Jawa Tengah 57411.
+    </div>
+  </div> <script>
+    // Baris ini mendaftarkan plugin datalabels agar bisa digunakan oleh Chart.js
+    Chart.register(ChartDataLabels);
+
+    // Variabel const ini menyimpan semua data 26 kecamatan dalam bentuk array of objects
+    // Data ini mencakup data tabel dari gambar DAN data koordinat yang sudah diperbarui
+    const kecamatanData = [
+      { nama:"Prambanan", jumlah: 53155, laju_pertumbuhan: -0.62, persentase: 4.08, kepadatan: 2037, rasio: 98.6, lat:-7.71928, lon:110.51405 },
+      { nama:"Gantiwarno", jumlah: 39194, laju_pertumbuhan: -2.92, persentase: 3.01, kepadatan: 1482, rasio: 99.2, lat:-7.76205, lon:110.54273 },
+      { nama:"Wedi", jumlah: 52878, laju_pertumbuhan: -1.93, persentase: 4.06, kepadatan: 2014, rasio: 98.5, lat:-7.78611, lon:110.60611 },
+      { nama:"Bayat", jumlah: 64539, laju_pertumbuhan: -1.78, persentase: 4.95, kepadatan: 1533, rasio: 100.1, lat:-7.77667, lon:110.63333 },
+      { nama:"Cawas", jumlah: 58471, laju_pertumbuhan: -1.48, persentase: 4.49, kepadatan: 1627, rasio: 97.4, lat:-7.76409, lon:110.69819 },
+      { nama:"Trucuk", jumlah: 80923, laju_pertumbuhan: -0.55, persentase: 6.21, kepadatan: 2333, rasio: 101.3, lat:-7.72175, lon:110.66798 },
+      { nama:"Kalikotes", jumlah: 37807, laju_pertumbuhan: 0.55, persentase: 2.90, kepadatan: 2679, rasio: 99.4, lat:-7.72167, lon:110.62500 },
+      { nama:"Kebonarum", jumlah: 19973, laju_pertumbuhan: -1.71, persentase: 1.53, kepadatan: 1917, rasio: 97.0, lat:-7.69222, lon:110.56361 },
+      { nama:"Jogonalan", jumlah: 60168, laju_pertumbuhan: -1.41, persentase: 4.62, kepadatan: 2181, rasio: 99.9, lat:-7.72472, lon:110.55763 },
+      { nama:"Manisrenggo", jumlah: 44249, laju_pertumbuhan: -0.57, persentase: 3.40, kepadatan: 1446, rasio: 98.6, lat:-7.69451, lon:110.48851 },
+      { nama:"Karangnongko", jumlah: 37649, laju_pertumbuhan: -0.87, persentase: 2.89, kepadatan: 1277, rasio: 97.8, lat:-7.66492, lon:110.54374 },
+      { nama:"Ngawen", jumlah: 46330, laju_pertumbuhan: 0.31, persentase: 3.56, kepadatan: 2511, rasio: 100.4, lat:-7.66944, lon:110.59333 },
+      { nama:"Ceper", jumlah: 66205, laju_pertumbuhan: -1.32, persentase: 5.08, kepadatan: 2569, rasio: 99.3, lat:-7.67418, lon:110.67726 },
+      { nama:"Pedan", jumlah: 47803, laju_pertumbuhan: -1.26, persentase: 3.67, kepadatan: 2390, rasio: 100.2, lat:-7.68389, lon:110.69639 },
+      { nama:"Karangdowo", jumlah: 43950, laju_pertumbuhan: -1.63, persentase: 3.37, kepadatan: 1426, rasio: 98.2, lat:-7.70250, lon:110.73167 },
+      { nama:"Juwiring", jumlah: 59375, laju_pertumbuhan: -0.33, persentase: 4.56, kepadatan: 1922, rasio: 99.5, lat:-7.65915, lon:110.74204 },
+      { nama:"Wonosari", jumlah: 64387, laju_pertumbuhan: 0.68, persentase: 4.94, kepadatan: 1929, rasio: 99.2, lat:-7.61406, lon:110.73655 },
+      { nama:"Delanggu", jumlah: 42605, laju_pertumbuhan: 0.29, persentase: 3.27, kepadatan: 2127, rasio: 98.2, lat:-7.61628, lon:110.70021 },
+      { nama:"Polanharjo", jumlah: 41435, laju_pertumbuhan: 0.26, persentase: 3.18, kepadatan: 1643, rasio: 97.1, lat:-7.61096, lon:110.66597 },
+      { nama:"Karanganom", jumlah: 47453, laju_pertumbuhan: 0.72, persentase: 3.64, kepadatan: 1852, rasio: 97.9, lat:-7.65111, lon:110.63190 },
+      { nama:"Tulung", jumlah: 55157, laju_pertumbuhan: 0.78, persentase: 4.23, kepadatan: 1602, rasio: 99.2, lat:-7.58778, lon:110.60806 },
+      { nama:"Jatinom", jumlah: 62064, laju_pertumbuhan: 0.85, persentase: 4.76, kepadatan: 1672, rasio: 100.0, lat:-7.63669, lon:110.57518 },
+      { nama:"Kemalang", jumlah: 40656, laju_pertumbuhan: 0.92, persentase: 3.12, kepadatan: 675, rasio: 98.9, lat:-7.65667, lon:110.51667 },
+      { nama:"Klaten Selatan", jumlah: 45399, laju_pertumbuhan: 0.92, persentase: 3.49, kepadatan: 3009, rasio: 97.6, lat:-7.71812, lon:110.57840 },
+      { nama:"Klaten Tengah", jumlah: 41763, laju_pertumbuhan: 0.18, persentase: 3.21, kepadatan: 4355, rasio: 96.6, lat:-7.71333, lon:110.59694 },
+      { nama:"Klaten Utara", jumlah: 49060, laju_pertumbuhan: 0.61, persentase: 3.77, kepadatan: 4392, rasio: 98.0, lat:-7.69083, lon:110.60806 }
+    ].sort((a, b) => a.nama.localeCompare(b.nama)); // .sort() ini mengurutkan data berdasarkan nama A-Z
+
+    // --- Bagian ini mendefinisikan variabel global untuk elemen-elemen HTML ---
+    const tableBody = document.querySelector('#dataTable tbody'); // Variabel untuk menampung elemen body tabel
+    const filterInput = document.getElementById('filterInput'); // Variabel untuk kotak input pencarian
+    const resetBtn = document.getElementById('resetBtn'); // Variabel untuk tombol reset
+    const barChartCtx = document.getElementById('barChartCanvas').getContext('2d'); // Variabel untuk canvas grafik batang
+    const pieChartCtx = document.getElementById('pieChartCanvas').getContext('2d'); // Variabel untuk canvas diagram pai
+    let barChartInstance = null; // Variabel untuk menyimpan objek grafik batang (agar bisa dihancurkan/di-update)
+    let pieChartInstance = null; // Variabel untuk menyimpan objek diagram pai
+    let map = null; // Variabel untuk menyimpan objek peta Leaflet
+    let markerGroup = null; // Variabel untuk menyimpan grup yang berisi semua marker di peta
+    const luasWilayahKm2 = 655.56; // Variabel konstanta untuk luas wilayah (tidak dipakai di fungsi)
+
+    // --- Bagian ini adalah fungsi utilitas untuk memformat angka ---
+    function formatNumber(n, decimals = 0) { 
+        // Fungsi ini mengubah angka seperti 1000 menjadi 1.000 atau 98.6 menjadi 98,6
+        return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) : '-'; 
+    }
+
+    // --- Bagian ini adalah fungsi untuk menghitung dan menampilkan statistik ringkasan ---
+    function computeSummaryStats(list) { 
+        const count = list.length; // Menghitung jumlah data (kecamatan) yang sedang ditampilkan
+        // Baris ini menampilkan jumlah kecamatan di kotak statistik
+        document.getElementById('kecamatanCount').textContent = count > 0 ? `${count} Kecamatan` : '-'; 
+        // Baris ini menghitung total kepadatan dari semua data yang tampil
+        const totalKepadatan = list.reduce((sum, item) => sum + (item.kepadatan || 0), 0); 
+        // Baris ini menghitung rata-rata kepadatan
+        const avgDensity = count > 0 ? Math.round(totalKepadatan / count) : 0; 
+        // Baris ini menampilkan rata-rata kepadatan di kotak statistik
+        document.getElementById('avgDensity').textContent = formatNumber(avgDensity) + " jiwa/km²"; 
+    }
+
+    // --- Bagian ini adalah fungsi untuk membuat dan menggambar grafik batang ---
+    function buildBarChart(data) {
+      const labels = data.map(d => d.nama); // Mengambil semua nama kecamatan untuk label
+      const values = data.map(d => d.kepadatan); // Mengambil data kepadatan untuk nilai grafik
+      
+      // Baris ini menghancurkan grafik batang yang lama (jika ada) sebelum membuat yang baru
+      if (barChartInstance) barChartInstance.destroy(); 
+      
+      // Baris ini membuat objek grafik batang baru menggunakan Chart.js
+      barChartInstance = new Chart(barChartCtx, {
+        type: 'bar', // Menentukan tipe grafik adalah 'bar' (batang)
+        data: { 
+            labels: labels, // Mengatur label sumbu X
+            datasets: [{ 
+                label: 'Kepadatan Penduduk', 
+                data: values, // Mengatur data (nilai) untuk setiap batang
+                backgroundColor: 'var(--chart-bar-bg)', // Mengatur warna isi batang
+                borderColor: 'var(--chart-bar-border)', // Mengatur warna garis tepi batang
+                borderWidth: 1, 
+                borderRadius: 4 
+            }] 
+        },
+        options: {
+            responsive: true, // Membuat grafik responsif
+            maintainAspectRatio: true, // Mempertahankan rasio aspek grafik
+            indexAxis: 'x', // Menjadikan sumbu X sebagai sumbu kategori
+            scales: {
+                // Mengatur sumbu Y (kiri)
+                y: { beginAtZero: true, grid: { color: 'var(--border-color)' }, ticks: { color: 'var(--text)', callback: function(value) { return formatNumber(value); } }, title: { display: true, text: 'Kepadatan (Jiwa/km²)', color: 'var(--text)' } },
+                // Mengatur sumbu X (bawah)
+                x: {
+                    grid: { display: false }, // Menyembunyikan garis grid
+                    ticks: { display: false }, // Menyembunyikan label nama kecamatan di sumbu X
+                    title: { display: false }
+                }
+            },
+            plugins: { 
+                legend: { display: false }, // Menyembunyikan legenda
+                // Mengatur tampilan tooltip (info saat batang di-hover)
+                tooltip: { 
+                    backgroundColor: 'rgba(79, 74, 69, 0.9)', 
+                    titleColor: '#f0e6d9', 
+                    bodyColor: '#ffffff', 
+                    titleFont: { family: 'Poppins'}, 
+                    bodyFont: { family: 'Poppins'}, 
+                    callbacks: { 
+                        // Fungsi ini mengatur format teks di dalam tooltip
+                        label: function(ctx) { 
+                            return `${ctx.label}: ${formatNumber(ctx.parsed.y)} jiwa/km²`; 
+                        } 
+                    } 
+                }, 
+                title: { display: false } // Menyembunyikan judul bawaan Chart.js
+            }
+        }
+      });
+    }
+
+    // --- Bagian ini adalah fungsi untuk membuat dan menggambar diagram pai ---
+    function buildPieChart(data) {
+        const labels = data.map(d => d.nama); // Mengambil nama kecamatan untuk label
+        const values = data.map(d => d.persentase); // Mengambil data persentase untuk nilai pai
+        
+        // Baris ini membuat palet warna otomatis jika data terlalu banyak
+        const currentBackgroundColors = labels.length <= 6
+            ? [ /* ...colors... */ ]
+            : labels.map((_, i) => `hsl(${ (i * 360 / labels.length * 1.618) % 360 }, 55%, 70%)`);
+
+        // Baris ini menghancurkan diagram pai yang lama (jika ada) sebelum membuat yang baru
+        if (pieChartInstance) pieChartInstance.destroy();
+
+        // Baris ini membuat objek diagram pai baru menggunakan Chart.js
+        pieChartInstance = new Chart(pieChartCtx, {
+            type: 'pie', // Menentukan tipe grafik adalah 'pie' (pai)
+            data: { 
+                labels: labels, // Mengatur label data
+                datasets: [{ 
+                    label: 'Persentase Penduduk', 
+                    data: values, // Mengatur data (nilai) untuk setiap irisan pai
+                    backgroundColor: currentBackgroundColors, // Mengatur warna irisan
+                    borderColor: 'var(--card)', 
+                    borderWidth: 1.5, 
+                    hoverOffset: 8 
+                }] 
+            },
+            options: {
+                responsive: true, // Membuat grafik responsif
+                maintainAspectRatio: true, // Mempertahankan rasio aspek
+                aspectRatio: 1, // Memastikan bentuknya lingkaran sempurna (1:1)
+                plugins: {
+                    legend: { display: false }, // Menyembunyikan legenda
+                    // Mengatur tampilan tooltip (info saat irisan di-hover)
+                    tooltip: { 
+                        backgroundColor: 'rgba(79, 74, 69, 0.9)', 
+                        titleColor: '#f0e6d9', 
+                        bodyColor: '#ffffff', 
+                        titleFont: { family: 'Poppins'}, 
+                        bodyFont: { family: 'Poppins'}, 
+                        callbacks: { 
+                            // Fungsi ini mengatur format teks di dalam tooltip
+                            label: function(ctx) { 
+                                let label = ctx.label || ''; 
+                                if (label) { label += ': '; } 
+                                const value = ctx.dataset.data[ctx.dataIndex]; 
+                                label += formatNumber(value, 2) + '%'; 
+                                return label; 
+                            } 
+                        }
+                    },
+                    title: { display: false }, // Menyembunyikan judul bawaan
+                    // Mengatur label data yang tampil di atas irisan pai
+                    datalabels: {
+                        // Fungsi ini mengatur format teks label data
+                        formatter: (value, ctx) => {
+                            if (value < 1.5 && data.length > 10) return null; // Sembunyikan label jika nilainya terlalu kecil
+                            return formatNumber(value, 1) + '%'; // Tampilkan nilai persentase
+                        },
+                        // Fungsi ini mengatur warna teks label (putih atau gelap) agar kontras
+                        color: (ctx) => { 
+                            const bgColor = ctx.dataset.backgroundColor[ctx.dataIndex]; 
+                            try { 
+                                const rgb = bgColor.startsWith('hsl') ? hslToRgb(bgColor) : bgColor.match(/\d+/g); 
+                                if (!rgb) return 'var(--pie-label-light)'; 
+                                const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000; 
+                                return brightness > 155 ? 'var(--pie-label-dark)' : 'var(--pie-label-light)'; 
+                            } catch (e) { 
+                                return 'var(--pie-label-light)'; 
+                            }
+                        },
+                        font: { size: 10, weight: '600', family: 'Poppins' },
+                        anchor: 'center', align: 'center', offset: 0, textAlign: 'center',
+                         textShadowBlur: 6, textShadowColor: 'rgba(0, 0, 0, 0.3)'
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Bagian ini adalah fungsi bantuan untuk mengubah warna HSL ke RGB ---
+    function hslToRgb(hsl) { 
+        // Fungsi ini diperlukan agar bisa menentukan kecerahan warna label pai
+        const result = hsl.match(/hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/); 
+        if (!result) return null; 
+        let h = parseInt(result[1]); 
+        let s = parseInt(result[2]) / 100; 
+        let l = parseInt(result[3]) / 100; 
+        let c = (1 - Math.abs(2 * l - 1)) * s, 
+            x = c * (1 - Math.abs((h / 60) % 2 - 1)), 
+            m = l - c/2, 
+            r = 0, g = 0, b = 0; 
+        if (0 <= h && h < 60) { r = c; g = x; b = 0; } 
+        else if (60 <= h && h < 120) { r = x; g = c; b = 0; } 
+        else if (120 <= h && h < 180) { r = 0; g = c; b = x; } 
+        else if (180 <= h && h < 240) { r = 0; g = x; b = c; } 
+        else if (240 <= h && h < 300) { r = x; g = 0; b = c; } 
+        else if (300 <= h && h < 360) { r = c; g = 0; b = x; } 
+        r = Math.round((r + m) * 255); 
+        g = Math.round((g + m) * 255); 
+        b = Math.round((b + m) * 255); 
+        return [r, g, b]; 
+    }
+
+    // --- Bagian ini adalah fungsi untuk inisialisasi peta Leaflet ---
+     function initializeMap() { 
+        // Baris ini membuat objek peta di dalam elemen <div id="map">
+        map = L.map('map', { zoomControl: true, attributionControl: false }).setView([-7.705, 110.606], 11); 
+        // Baris ini menambahkan 'tile layer' atau basemap (peta dasar) dari CARTO
+        const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OSM &copy; CARTO', maxZoom: 19 }).addTo(map); 
+        // Baris ini mendefinisikan basemap alternatif (OpenStreetMap)
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OSM contributors' }); 
+        // Baris ini mendefinisikan basemap alternatif (Citra Satelit ESRI)
+        const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' }); 
+        // Baris ini mengelompokkan basemap
+        const baseMaps = { "Peta Dasar (Light)": cartoLight, "OpenStreetMap": osm, "Citra Satelit (ESRI)": esri }; 
+        // Baris ini menambahkan kontrol untuk memilih basemap di pojok kanan atas peta
+        L.control.layers(baseMaps, null, { collapsed: false }).addTo(map); 
+        // Baris ini menambahkan skala peta di pojok kanan bawah
+        L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map); 
+        // Baris ini menambahkan atribusi (copyright) di pojok kiri bawah
+        L.control.attribution({ position: 'bottomleft' }).addTo(map); 
+        // Baris ini membuat sebuah grup layer untuk menampung semua marker
+        markerGroup = L.layerGroup().addTo(map); 
+        // Baris ini memanggil fungsi untuk menambahkan marker ke peta saat pertama kali dimuat
+        addMarkers(kecamatanData); 
+    }
+    
+    // --- Bagian ini adalah fungsi untuk menambahkan marker (penanda) ke peta ---
+    function addMarkers(data) { 
+        if (!markerGroup) return; // Hentikan fungsi jika grup marker belum siap
+        // Baris ini membersihkan semua marker yang lama dari peta
+        markerGroup.clearLayers(); 
+        
+        // Bagian ini menghitung kepadatan min & max untuk menentukan ukuran radius marker
+        const kepadatanValues = data.map(item => item.kepadatan || 0).filter(k => k > 0); 
+        const minKepadatan = Math.min(...kepadatanValues); 
+        const maxKepadatan = Math.max(...kepadatanValues); 
+        
+        // Looping untuk setiap kecamatan di dalam data
+        data.forEach(item => { 
+            if (typeof item.lat !== 'number' || typeof item.lon !== 'number') return; // Lewati jika data koordinat tidak valid
+            
+            // Logika untuk menghitung radius lingkaran berdasarkan kepadatan
+            let radius = 6; 
+            if (maxKepadatan > minKepadatan && item.kepadatan > 0) { 
+                const scaleFactor = Math.log(item.kepadatan / minKepadatan) / Math.log(maxKepadatan / minKepadatan); 
+                radius = 6 + scaleFactor * 14; 
+            } 
+            radius = Math.max(6, Math.min(20, radius)); // Membatasi ukuran radius
+            
+            // Baris ini membuat marker berbentuk lingkaran (circleMarker)
+            const circle = L.circleMarker([item.lat, item.lon], { 
+                radius: radius, // Mengatur radius sesuai perhitungan
+                fillColor: 'var(--marker-fill)', // Mengatur warna isi
+                color: 'var(--marker-border)', // Mengatur warna garis tepi
+                weight: 1.5, 
+                fillOpacity: 0.8 
+            }).addTo(markerGroup); // Menambahkan lingkaran ke grup marker
+            
+            // Baris ini menambahkan tooltip (label) yang muncul saat marker di-hover
+            circle.bindTooltip(`<strong>${item.nama}</strong><br>${formatNumber(item.kepadatan)} jiwa/km²`, { direction: 'auto', sticky: true }); 
+            
+            // Baris ini mendefinisikan konten HTML untuk popup (info box) saat marker diklik
+            const popupHtml = `<div style="font-size:14px; line-height:1.6;"><strong>Kec. ${item.nama}</strong><hr style='margin: 5px 0; border-color: var(--border-color);'> Jumlah: ${formatNumber(item.jumlah)} jiwa<br> Persentase: ${formatNumber(item.persentase, 2)}%<br> Kepadatan: <strong>${formatNumber(item.kepadatan)} jiwa/km²</strong><br> Laju Pertumbuhan: ${formatNumber(item.laju_pertumbuhan, 2)}%<br> Rasio JK: ${formatNumber(item.rasio, 1)}%</div>`; 
+            
+            // Baris ini mengikat konten HTML popup ke marker
+            circle.bindPopup(popupHtml, { minWidth: 200 }); 
+        }); 
+    }
+
+    // --- Bagian ini adalah fungsi untuk mengisi data ke dalam tabel HTML ---
+    function renderTable(list) { 
+        // Baris ini mengosongkan isi tabel (tbody) sebelum diisi data baru
+        tableBody.innerHTML = ''; 
+        
+        // Baris ini menampilkan pesan jika data tidak ditemukan (hasil filter kosong)
+        if (list.length === 0) { 
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 25px; color: var(--text);">Data kecamatan tidak ditemukan.</td></tr>'; 
+            return; 
+        } 
+        
+        // Baris ini mengurutkan data berdasarkan nama A-Z
+        list.sort((a, b) => a.nama.localeCompare(b.nama)); 
+        
+        // Looping untuk setiap data kecamatan
+        list.forEach((row, idx) => { 
+            // Baris ini membuat elemen <tr> (baris tabel) baru
+            const tr = document.createElement('tr'); 
+            // Baris ini menyimpan data nama, lat, dan lon di atribut baris (untuk interaksi klik)
+            tr.setAttribute('data-nama', row.nama); 
+            tr.setAttribute('data-lat', row.lat); 
+            tr.setAttribute('data-lon', row.lon); 
+            tr.style.cursor = 'pointer'; // Mengubah kursor menjadi tangan saat di atas baris
+            
+            // Baris ini mengisi HTML untuk setiap sel (<td>) di dalam baris
+            tr.innerHTML = `<td>${idx + 1}</td> 
+                            <td>${row.nama}</td> 
+                            <td>${formatNumber(row.jumlah)}</td> 
+                            <td>${formatNumber(row.laju_pertumbuhan, 2)}</td> 
+                            <td>${formatNumber(row.persentase, 2)}</td> 
+                            <td>${formatNumber(row.kepadatan)}</td> 
+                            <td>${formatNumber(row.rasio, 1)}</td>`; 
+            
+            // Baris ini menambahkan baris <tr> yang sudah jadi ke dalam <tbody> tabel
+            tableBody.appendChild(tr); 
+        }); 
+    }
+
+    // --- Bagian ini adalah fungsi utama untuk menerapkan filter pencarian ---
+    function applyFilter(text) { 
+        // Baris ini mengambil teks pencarian, membersihkan spasi, dan mengubah ke huruf kecil
+        const q = (text || '').trim().toLowerCase(); 
+        
+        // Menyiapkan variabel 'filtered' dengan semua data
+        let filtered = kecamatanData; 
+        
+        // Jika ada teks pencarian (q), filter data utamanya
+        if (q) { 
+            filtered = kecamatanData.filter(d => d.nama.toLowerCase().includes(q)); 
+        } 
+        
+        // Memanggil semua fungsi update dengan menggunakan data yang sudah difilter
+        renderTable(filtered); // Memperbarui tabel
+        buildBarChart(filtered); // Memperbarui grafik batang
+        buildPieChart(filtered); // Memperbarui diagram pai
+        addMarkers(filtered); // Memperbarui marker di peta
+        computeSummaryStats(filtered); // Memperbarui kotak statistik
+        
+        // Bagian ini mengatur peta untuk zoom ke hasil filter
+        if (filtered.length > 0 && q) { 
+            const bounds = L.latLngBounds(filtered.map(item => [item.lat, item.lon])); 
+            if (bounds.isValid()) { 
+                map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 }); 
+            } 
+        } else if (!q) { 
+            // Jika filter kosong (direset), kembalikan peta ke tampilan awal
+            map.setView([-7.705, 110.606], 11); 
+        } 
+    }
+
+    // --- Bagian ini adalah fungsi untuk mengatur semua event listener (interaksi pengguna) ---
+    function setupEventListeners() { 
+        // Baris ini menambahkan event listener saat pengguna mengetik di kotak pencarian
+        filterInput.addEventListener('input', (e) => applyFilter(e.target.value)); 
+        
+        // Baris ini menambahkan event listener saat tombol 'Reset' diklik
+        resetBtn.addEventListener('click', () => { 
+            filterInput.value = ''; // Mengosongkan kotak pencarian
+            applyFilter(''); // Memanggil filter dengan teks kosong
+        }); 
+        
+        // Baris ini menambahkan event listener saat salah satu baris tabel (tbody) diklik
+        tableBody.addEventListener('click', (ev) => { 
+            const tr = ev.target.closest('tr'); // Menemukan elemen <tr> yang diklik
+            if (!tr || !tr.dataset.nama) return; // Hentikan jika yang diklik bukan baris data
+            
+            // Mengambil data lat dan lon yang tersimpan di atribut baris
+            const lat = parseFloat(tr.dataset.lat); 
+            const lon = parseFloat(tr.dataset.lon); 
+            
+            // Jika koordinat valid, pindahkan peta ke lokasi tersebut
+            if (!isNaN(lat) && !isNaN(lon)) { 
+                map.flyTo([lat, lon], 14, { duration: 0.8 }); // Animasi peta terbang
+                
+                // Looping untuk membuka popup marker yang sesuai
+                markerGroup.eachLayer(layer => { 
+                    const latlng = layer.getLatLng(); 
+                    if (Math.abs(latlng.lat - lat) < 0.0001 && Math.abs(latlng.lng - lon) < 0.0001) { 
+                        requestAnimationFrame(() => { layer.openPopup(); }); // Membuka popup
+                    } 
+                }); 
+            } 
+        }); 
+        
+        // Baris ini menambahkan event listener saat tombol 'Enter' ditekan di kotak pencarian
+        filterInput.addEventListener('keypress', (e) => { 
+            if (e.key === 'Enter') { 
+                e.preventDefault(); // Mencegah form tersubmit
+                const firstResultRow = tableBody.querySelector('tr[data-nama]'); 
+                // Jika ada hasil, otomatis pindah ke lokasi hasil pertama
+                if (firstResultRow) { 
+                    const lat = parseFloat(firstResultRow.dataset.lat); 
+                    const lon = parseFloat(firstResultRow.dataset.lon); 
+                    if (!isNaN(lat) && !isNaN(lon)) map.flyTo([lat, lon], 14); 
+                } 
+            } 
+        }); 
+    }
+
+    // --- Bagian ini adalah titik awal eksekusi JavaScript ---
+    // Event listener ini menunggu sampai seluruh dokumen HTML selesai dimuat
+    document.addEventListener('DOMContentLoaded', () => { 
+        // Memanggil semua fungsi inisialisasi untuk membangun tampilan awal halaman
+        initializeMap(); // Membuat peta
+        buildBarChart(kecamatanData); // Membuat grafik batang dengan semua data
+        buildPieChart(kecamatanData); // Membuat diagram pai dengan semua data
+        renderTable(kecamatanData); // Mengisi tabel dengan semua data
+        computeSummaryStats(kecamatanData); // Menghitung statistik awal
+        setupEventListeners(); // Mengaktifkan semua interaksi (klik, ketik)
+    });
+
+  </script>
+</body>
+</html>
